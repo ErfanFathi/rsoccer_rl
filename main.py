@@ -58,7 +58,7 @@ if __name__ == "__main__":
     print("---------------------------------------")
 
     # Create Environment
-    env = gym.make('SSLGoToBall-v0')
+    env = gym.make('SSLGoToBallIR2-v0')
 
     # Set Seeds
     env.seed(args.seed)
@@ -82,7 +82,7 @@ if __name__ == "__main__":
     # Load model and optimizer parameters
     if args.load_model != "":
         policy_file = file_name if args.load_model == "default" else args.load_model
-        policy.load(f"./weight/{policy_file}")
+        policy.load(f"./weights/{policy_file}")
 
     # Initialize
     state, done = env.reset(), False
@@ -90,11 +90,13 @@ if __name__ == "__main__":
     episode_timesteps = 0
     episode_num = 0
     transitions = []
-    high_eval = 0
+    high_eval = -1200
     timestep = 0
+    # save rewards for plotting
+    rewards = []
 
     # Training Loop
-    while episode_num <= args.max_episode:
+    while episode_num < args.max_episode:
         # Select action randomly or according to policy
         eps_rnd = random.random()
         dec = min(max(0.1, 1.0 - float(timestep - args.start_timesteps) * 0.00009), 1)
@@ -132,7 +134,8 @@ if __name__ == "__main__":
                 for i in range(int(episode_timesteps/10)):
                         policy.train(replay_buffer, args.batch_size)
 
-            print(f"Episode Num: {episode_num} Reward: {episode_reward} Timestep: {timestep}")
+            print(f"Episode Num: {episode_num+1} Reward: {episode_reward} Timestep: {timestep}")
+            rewards.append(episode_reward)
 
             state, done = env.reset(), False
             episode_reward = 0
@@ -147,6 +150,6 @@ if __name__ == "__main__":
                 if eval > high_eval:
                     high_eval = eval
                     if args.save_model: 
-                        policy.save(f"./models/{file_name}")
+                        policy.save(f"./weights/{file_name+str(episode_num+1)}")
                         print('saved in ', episode_num+1)
                 state, done = env.reset(), False

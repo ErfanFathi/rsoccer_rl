@@ -11,7 +11,7 @@ def create_video(source, fps=60, output_name='output'):
     out.release()
 
 
-env = gym.make('SSLGoToBall-v0')
+env = gym.make('SSLGoToBallIR2-v0')
 # state dimension
 state_dim = env.observation_space.shape[0]
 action_dim = env.action_space.shape[0]
